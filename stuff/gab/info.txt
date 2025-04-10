@@ -1,0 +1,28 @@
+http://192.144.12.242:1706/info
+
+output:
+{
+	"type": "object",
+	"properties": {
+		"date_range": {
+			"type": "string",
+			"description": "период времени (диапазон дат), за который есть жалобы"
+		},
+		"all_products": {
+			"type": "string",
+			"description": "все темы жалоб"
+		},
+		"all_bankNames": {
+			"type": "string",
+			"description": "все банки, по которым есть данные (жалобы)"
+		},
+		"n_locations": {
+			"type": "integer",
+			"description": "количество населенных пунктов, из которых поданы жалобы"
+		},
+		"available_report_formats": {
+			"type": "string",
+			"description": "форматы, в которые возможно выгрузить данные (жалобы)"
+		}
+	}
+}

@@ -1,0 +1,114 @@
+https://utc-plus-minus-delta.containerapps.ru/utcdelta
+
+POST
+
+body:
+{
+  "years": "${years}",
+  "months": "${months}",
+  "weeks": "${weeks}",
+  "days": "${days}",
+  "hours": "${hours}",
+  "minutes": "${minutes}",
+  "seconds": "${seconds}",
+  "microseconds": "${microseconds}"
+}
+
+input:
+{
+	"type": "object",
+	"properties": {
+		"days": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество дней со знаком плюс или минус"
+		},
+		"hours": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество часов со знаком плюс или минус"
+		},
+		"weeks": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество недель со знаком плюс или минус"
+		},
+		"years": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество лет со знаком плюс или минус"
+		},
+		"months": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество месяцев со знаком плюс или минус"
+		},
+		"minutes": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество минут со знаком плюс или минус"
+		},
+		"seconds": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество секунд со знаком плюс или минус"
+		},
+		"microseconds": {
+			"type": "integer",
+			"default": 0,
+			"description": "количество микросекунд со знаком плюс или минус"
+		}
+	}
+}
+
+output:
+{
+	"type": "object",
+	"properties": {
+		"delta": {
+			"type": "object",
+			"properties": {
+				"days": {
+					"type": "integer",
+					"description": "количество дней со знаком плюс или минус"
+				},
+				"hours": {
+					"type": "integer",
+					"description": "количество часов со знаком плюс или минус"
+				},
+				"weeks": {
+					"type": "integer",
+					"description": "количество недель со знаком плюс или минус"
+				},
+				"years": {
+					"type": "integer",
+					"description": "количество лет со знаком плюс или минус"
+				},
+				"months": {
+					"type": "integer",
+					"description": "количество месяцев со знаком плюс или минус"
+				},
+				"minutes": {
+					"type": "integer",
+					"description": "количество минут со знаком плюс или минус"
+				},
+				"seconds": {
+					"type": "integer",
+					"description": "количество секунд со знаком плюс или минус"
+				},
+				"microseconds": {
+					"type": "integer",
+					"description": "количество микросекунд со знаком плюс или минус"
+				}
+			}
+		},
+		"utcnow": {
+			"type": "string",
+			"description": "дата и время в UTC+0"
+		},
+		"boundary": {
+			"type": "string",
+			"description": "граница интервала utcnow + delta"
+		}
+	}
+}

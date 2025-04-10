@@ -1,0 +1,14 @@
+[Unit]
+Description=database-api
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=meredelin
+WorkingDirectory=/home/meredelin/banki-ru-reviews-database-api
+ExecStart=/home/meredelin/banki-ru-reviews-database-api/.venv/bin/python /home/meredelin/banki-ru-reviews-database-api/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

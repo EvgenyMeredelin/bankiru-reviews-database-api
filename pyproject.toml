@@ -1,0 +1,19 @@
+[project]
+name = "bankiru-reviews-database-api"
+version = "0.1.0"
+description = "Banki.ru Agent Database API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "boto3>=1.37.31",
+    "fastapi[standard]>=0.115.12",
+    "matplotlib>=3.10.1",
+    "more-itertools>=10.6.0",
+    "mplcyberpunk>=0.7.6",
+    "pandas>=2.2.3",
+    "py-spoo-url>=0.0.6",
+    "python-decouple>=3.8",
+    "seaborn>=0.13.2",
+    "sqlalchemy>=2.0.40",
+]

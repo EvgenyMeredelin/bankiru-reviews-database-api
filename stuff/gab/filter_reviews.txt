@@ -1,0 +1,37 @@
+http://192.144.12.242:1706/reviews?${query_bankName}&${query_location}&${query_product}&${query_startDate}&reportFormat=${reportFormat}
+
+GET
+
+input:
+{
+	"type": "object",
+	"properties": {
+		"query_product": {
+			"type": "string"
+		},
+		"reportFormat": {
+			"type": "string",
+			"description": "формат отчета, в котором нужно вернуть ответ"
+		},
+		"query_bankName": {
+			"type": "string"
+		},
+		"query_location": {
+			"type": "string"
+		},
+		"query_startDate": {
+			"type": "string"
+		}
+	}
+}
+
+output:
+{
+	"type": "object",
+	"properties": {
+		"agent_message": {
+			"type": "string",
+			"description": "ответ, который нужно целиком вернуть пользователю"
+		}
+	}
+}

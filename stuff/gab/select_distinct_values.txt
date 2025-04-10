@@ -1,0 +1,14 @@
+http://192.144.12.242:1706/reviews/${columnName}
+
+GET
+
+input:
+{
+	"type": "object",
+	"properties": {
+		"columnName": {
+			"type": "string",
+			"description": "столбец, для которого нужно вызвать функцию"
+		}
+	}
+}
