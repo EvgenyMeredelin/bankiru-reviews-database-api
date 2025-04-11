@@ -1,4 +1,4 @@
-http://192.144.12.242:1706/reviews/${columnName}
+/reviews/${columnName}
 
 GET
 

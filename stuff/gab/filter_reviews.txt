@@ -1,4 +1,4 @@
-http://192.144.12.242:1706/reviews?${query_bankName}&${query_location}&${query_product}&${query_startDate}&reportFormat=${reportFormat}
+/reviews?${query_bankName}&${query_location}&${query_product}&${query_startDate}&reportFormat=${reportFormat}
 
 GET
 

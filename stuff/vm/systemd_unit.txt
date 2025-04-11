@@ -6,8 +6,8 @@ After=network.target
 [Service]
 Type=simple
 User=meredelin
-WorkingDirectory=/home/meredelin/banki-ru-reviews-database-api
-ExecStart=/home/meredelin/banki-ru-reviews-database-api/.venv/bin/python /home/meredelin/banki-ru-reviews-database-api/main.py
+WorkingDirectory=/home/meredelin/bankiru-reviews-database-api
+ExecStart=/home/meredelin/bankiru-reviews-database-api/.venv/bin/python /home/meredelin/bankiru-reviews-database-api/main.py
 Restart=always
 
 [Install]
