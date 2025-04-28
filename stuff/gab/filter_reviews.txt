@@ -7,20 +7,24 @@ input:
 	"type": "object",
 	"properties": {
 		"query_product": {
-			"type": "string"
+			"type": "string",
+			"description": "query_product"
 		},
 		"reportFormat": {
 			"type": "string",
 			"description": "формат отчета, в котором нужно вернуть ответ"
 		},
 		"query_bankName": {
-			"type": "string"
+			"type": "string",
+			"description": "query_bankName"
 		},
 		"query_location": {
-			"type": "string"
+			"type": "string",
+			"description": "query_location"
 		},
 		"query_startDate": {
-			"type": "string"
+			"type": "string",
+			"description": "query_startDate"
 		}
 	}
 }
