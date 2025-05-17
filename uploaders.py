@@ -1,6 +1,6 @@
 import inspect
 import io
-import os
+# import os
 import sys
 from abc import ABC, abstractmethod
 from functools import cached_property
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import mplcyberpunk
 import pandas as pd
 import seaborn as sns
-from botocore.client import Config
+# from botocore.client import Config
 from decouple import config
 from more_itertools import constrained_batches
 from py_spoo_url import Shortener
@@ -23,19 +23,19 @@ import settings
 from settings import PLOT_MAX_ITEMS as M
 
 
-os.environ["AWS_REQUEST_CHECKSUM_CALCULATION"] = "when_required"
-os.environ["AWS_RESPONSE_CHECKSUM_VALIDATION"] = "when_required"
+# os.environ["AWS_REQUEST_CHECKSUM_CALCULATION"] = "when_required"
+# os.environ["AWS_RESPONSE_CHECKSUM_VALIDATION"] = "when_required"
 
 plt.rcParams.update(settings.MPL_RUNTIME_CONFIG)
 plt.style.use("cyberpunk")
 
 
 bucket_name = config("S3_BUCKET_NAME")
-# tenant_id   = config("S3_TENANT_ID")
-# key_id      = config("S3_KEY_ID")
+tenant_id   = config("S3_TENANT_ID")
+key_id      = config("S3_KEY_ID")
 
 session = boto3.session.Session(
-    # aws_access_key_id=f"{tenant_id}:{key_id}",
+    aws_access_key_id=f"{tenant_id}:{key_id}",
     aws_access_key_id=config("S3_KEY_ID"),
     aws_secret_access_key=config("S3_KEY_SECRET"),
     region_name=config("S3_REGION_NAME")
@@ -44,7 +44,7 @@ session = boto3.session.Session(
 client = session.client(
     service_name="s3",
     endpoint_url=config("S3_ENDPOINT_URL"),
-    config=Config(s3={"addressing_style": "virtual"})
+    # config=Config(s3={"addressing_style": "virtual"})
 )
 
 
@@ -74,7 +74,7 @@ class FileUploader(ABC):
     def upload_file(
         self,
         filename: str | None = None,
-        bucket_name: str = "birdy-ecs-temp",  # was "temp"
+        bucket_name: str = "temp",  # was "birdy-ecs-temp"
         *,
         generate_url: bool = True,
         shorten_url: bool = True
