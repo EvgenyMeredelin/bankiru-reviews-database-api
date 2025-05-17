@@ -36,7 +36,7 @@ key_id      = config("S3_KEY_ID")
 
 session = boto3.session.Session(
     aws_access_key_id=f"{tenant_id}:{key_id}",
-    aws_access_key_id=config("S3_KEY_ID"),
+    # aws_access_key_id=config("S3_KEY_ID"),
     aws_secret_access_key=config("S3_KEY_SECRET"),
     region_name=config("S3_REGION_NAME")
 )
