@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 import uvicorn
-from decouple import config
+from decouple import config, Csv
 from fastapi import Depends, FastAPI, HTTPException, Path, Query, status
 from fastapi.security import APIKeyHeader
 from sqlalchemy import delete, distinct, func, select
@@ -20,16 +20,43 @@ from models import Review, review_columns
 
 valid_column_names = Literal[tuple(review_columns)]
 database_api_key_header = APIKeyHeader(name="Access-Token")
+sudo_tokens = config("SUDO_TOKENS", cast=Csv())
+user_tokens = config("USER_TOKENS", cast=Csv())
 
 
-async def validate_api_key(token: str = Depends(database_api_key_header)):
-    """Validate header with API access token. """
-    if token != config("DATABASE_API_TOKEN"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+class AccessTokenChecker:
+    """
+    Role-sensitive access token checker.
+    """
+
+    role_tokens_mapping = {
+        "sudo": sudo_tokens,
+        "user": sudo_tokens + user_tokens
+    }
+
+    def __init__(self, role: Literal["sudo", "user"]) -> None:
+        self.role = role
+
+    def __call__(
+        self, token: Annotated[str, Depends(database_api_key_header)]
+    ) -> None:
+        if token not in self.__class__.role_tokens_mapping[self.role]:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+
+sudo_checker = AccessTokenChecker("sudo")
+user_checker = AccessTokenChecker("user")
+
+
+# async def validate_api_key(token: str = Depends(database_api_key_header)):
+#     """Validate header with API access token. """
+#     if token != config("DATABASE_API_TOKEN"):
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
 
 async def get_review_or_404(
-    id: int, session: AsyncSession = Depends(get_async_session)
+    id     : int,
+    session: Annotated[AsyncSession, Depends(get_async_session)]
 ) -> Review:
     statement = select(Review).where(Review.id == id)
     result = await session.execute(statement)
@@ -40,7 +67,8 @@ async def get_review_or_404(
 
 
 async def all_distinct_scalars(
-    session: AsyncSession, column_name: valid_column_names  # type: ignore
+    column_name: valid_column_names,  # type: ignore
+    session    : AsyncSession
 ) -> list[ScalarResult]:
     column = getattr(Review, column_name)
     result = await session.execute(select(distinct(column)))
@@ -48,7 +76,8 @@ async def all_distinct_scalars(
 
 
 async def numbered_list(
-    session: AsyncSession, column_name: valid_column_names  # type: ignore
+    column_name: valid_column_names,  # type: ignore
+    session    : AsyncSession
 ) -> str:
     values = await all_distinct_scalars(session, column_name)
     width = len(str(len(values)))
@@ -64,34 +93,41 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, dependencies=[Depends(validate_api_key)])
+app = FastAPI(lifespan=lifespan)
 
 
-@app.post("/reviews", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/reviews",
+    dependencies=[Depends(sudo_checker)],
+    status_code=status.HTTP_201_CREATED
+)
 async def create_reviews(
     new_reviews: list[schemas.Review],
-    session: AsyncSession = Depends(get_async_session)
-):
+    session    : Annotated[AsyncSession, Depends(get_async_session)]
+) -> None:
     reviews = [Review(**review.model_dump()) for review in new_reviews]
     session.add_all(reviews)
     await session.commit()
     up.database_backup()
 
 
-@app.get("/reviews")
+@app.get("/reviews", dependencies=[Depends(user_checker)])
 async def filter_reviews(
-    session     : AsyncSession = Depends(get_async_session),
+    session     : Annotated[AsyncSession, Depends(get_async_session)],
     bankName    : Annotated[list[str] | None, Query()] = None,
     location    : Annotated[list[str] | None, Query()] = None,
     product     : Annotated[list[str] | None, Query()] = None,
     startDate   : Annotated[str | None, Query()] = None,
     reportFormat: Annotated[str | None, Query()] = up.DEFAULT_REPORT_FORMAT
 ) -> dict[str, str]:
-
-    mapping = {"bankName": bankName, "location": location, "product": product}
+    column_param_mapping = {
+        "bankName": bankName,
+        "location": location,
+        "product" : product
+    }
     clauses = [
         getattr(Review, column_name).in_(query_param)
-        for column_name, query_param in mapping.items()
+        for column_name, query_param in column_param_mapping.items()
         if query_param is not None
     ]
 
@@ -131,19 +167,19 @@ async def filter_reviews(
     return {"agent_message": "\n".join(agent_message_parts)}
 
 
-@app.get("/reviews/{column_name}")
+@app.get("/reviews/{column_name}", dependencies=[Depends(sudo_checker)])
 async def select_distinct_values(
     column_name: Annotated[valid_column_names, Path()],  # type: ignore
-    session: AsyncSession = Depends(get_async_session)
+    session    : Annotated[AsyncSession, Depends(get_async_session)]
 ) -> dict[str, str]:
     values = await all_distinct_scalars(session, column_name)
     query_param = tools.format_query_param(column_name, values)
     return {f"query_{column_name}": query_param}
 
 
-@app.get("/info")
+@app.get("/info", dependencies=[Depends(user_checker)])
 async def info(
-    session: AsyncSession = Depends(get_async_session)
+    session: Annotated[AsyncSession, Depends(get_async_session)]
 ) -> dict[str, str | int]:
     """
     Enrich agent's knowledge base with extra fields/facts/descr stats, etc.
@@ -162,11 +198,15 @@ async def info(
     }
 
 
-@app.patch("/reviews/{id}", response_model=schemas.Review)
+@app.patch(
+    "/reviews/{id}",
+    dependencies=[Depends(sudo_checker)],
+    response_model=schemas.Review
+)
 async def update_review(
     review_patch: schemas.ReviewPatch,
-    review: Review = Depends(get_review_or_404),
-    session: AsyncSession = Depends(get_async_session),
+    review      : Annotated[Review, Depends(get_review_or_404)],
+    session     : Annotated[AsyncSession, Depends(get_async_session)],
 ) -> Review:
     for key, value in review_patch.model_dump().items():
         setattr(review, key, value)
@@ -176,11 +216,15 @@ async def update_review(
     return review
 
 
-@app.delete("/reviews", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_reviews(  # many reviews at once
+@app.delete(
+    "/reviews",
+    dependencies=[Depends(sudo_checker)],
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_reviews(  # many at once
     drop_ids: list[int],
-    session: AsyncSession = Depends(get_async_session),
-):
+    session : Annotated[AsyncSession, Depends(get_async_session)],
+) -> None:
     statement = delete(Review).where(Review.id.in_(drop_ids))
     await session.execute(statement)
     await session.commit()
