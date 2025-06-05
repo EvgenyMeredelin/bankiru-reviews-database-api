@@ -79,7 +79,7 @@ async def numbered_list(
     column_name: valid_column_names,  # type: ignore
     session    : AsyncSession
 ) -> str:
-    values = await all_distinct_scalars(session, column_name)
+    values = await all_distinct_scalars(column_name, session)
     width = len(str(len(values)))
     return "\n".join(
         f"{str(number).zfill(width)}. {item}"
@@ -172,7 +172,7 @@ async def select_distinct_values(
     column_name: Annotated[valid_column_names, Path()],  # type: ignore
     session    : Annotated[AsyncSession, Depends(get_async_session)]
 ) -> dict[str, str]:
-    values = await all_distinct_scalars(session, column_name)
+    values = await all_distinct_scalars(column_name, session)
     query_param = tools.format_query_param(column_name, values)
     return {f"query_{column_name}": query_param}
 
@@ -184,9 +184,9 @@ async def info(
     """
     Enrich agent's knowledge base with extra fields/facts/descr stats, etc.
     """
-    all_bankNames = await numbered_list(session, column_name="bankName")
-    all_products  = await numbered_list(session, column_name="product")
-    all_locations = await all_distinct_scalars(session, column_name="location")
+    all_bankNames = await numbered_list("bankName", session)
+    all_products  = await numbered_list("product", session)
+    all_locations = await all_distinct_scalars("location", session)
     min_date = await session.execute(select(func.min(Review.datePublished)))
     max_date = await session.execute(select(func.max(Review.datePublished)))
     return {
