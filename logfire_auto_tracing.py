@@ -11,7 +11,7 @@ logfire.configure(
     )
 )
 logfire.install_auto_tracing(
-    modules=["main, tools, uploaders"],
+    modules=["main", "tools", "uploaders"],
     min_duration=0
 )
 
