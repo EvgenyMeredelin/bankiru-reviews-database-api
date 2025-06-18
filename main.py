@@ -89,7 +89,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-logfire.configure(token=config("LOGFIRE_TOKEN"))
+
+
+def scrubbing_callback(m: logfire.ScrubMatch):
+    if m.path == ("attributes", "fastapi.arguments.values", "session"):
+        return m.value
+
+
+logfire.configure(
+    token=config("LOGFIRE_TOKEN"),
+    scrubbing=logfire.ScrubbingOptions(callback=scrubbing_callback)
+)
 logfire.instrument_fastapi(app, capture_headers=True, record_send_receive=True)
 
 
