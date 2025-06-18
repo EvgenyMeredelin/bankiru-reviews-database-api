@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 import logfire
-import uvicorn
 from decouple import config, Csv
 from fastapi import Depends, FastAPI, HTTPException, Path, Query, status
 from fastapi.security import APIKeyHeader
@@ -89,17 +88,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-
-def scrubbing_callback(m: logfire.ScrubMatch):
-    if m.path == ("attributes", "fastapi.arguments.values", "session"):
-        return m.value
-
-
-logfire.configure(
-    token=config("LOGFIRE_TOKEN"),
-    scrubbing=logfire.ScrubbingOptions(callback=scrubbing_callback)
-)
 logfire.instrument_fastapi(app, capture_headers=True, record_send_receive=True)
 
 
@@ -236,12 +224,3 @@ async def delete_reviews(  # many at once
     await session.execute(statement)
     await session.commit()
     up.database_backup()
-
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host=config("VM_HOST"),
-        port=int(config("VM_PORT")),
-        reload=True
-    )

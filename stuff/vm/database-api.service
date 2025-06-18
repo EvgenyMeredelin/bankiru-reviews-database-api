@@ -7,7 +7,7 @@ After=network.target
 Type=simple
 User=meredelin
 WorkingDirectory=/home/meredelin/bankiru-reviews-database-api
-ExecStart=/home/meredelin/bankiru-reviews-database-api/.venv/bin/python /home/meredelin/bankiru-reviews-database-api/main.py
+ExecStart=/home/meredelin/bankiru-reviews-database-api/.venv/bin/python /home/meredelin/bankiru-reviews-database-api/logfire_auto_tracing.py
 Restart=always
 
 [Install]
