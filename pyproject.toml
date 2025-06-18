@@ -8,6 +8,7 @@ dependencies = [
     "aiosqlite>=0.21.0",
     "boto3>=1.37.31",
     "fastapi[standard]>=0.115.12",
+    "logfire[fastapi]>=3.21.0",
     "matplotlib>=3.10.1",
     "more-itertools>=10.6.0",
     "mplcyberpunk>=0.7.6",

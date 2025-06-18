@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Annotated, Literal
 
+import logfire
 import uvicorn
 from decouple import config, Csv
 from fastapi import Depends, FastAPI, HTTPException, Path, Query, status
@@ -29,7 +30,7 @@ class AccessTokenChecker:
     Role-sensitive access token checker.
     """
 
-    role_tokens_mapping = {
+    role_tokens_mapping: dict[str, list[str]] = {
         "sudo": sudo_tokens,
         "user": sudo_tokens + user_tokens
     }
@@ -46,12 +47,6 @@ class AccessTokenChecker:
 
 sudo_checker = AccessTokenChecker("sudo")
 user_checker = AccessTokenChecker("user")
-
-
-# async def validate_api_key(token: str = Depends(database_api_key_header)):
-#     """Validate header with API access token. """
-#     if token != config("DATABASE_API_TOKEN"):
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
 
 async def get_review_or_404(
@@ -94,6 +89,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+logfire.configure(token=config("LOGFIRE_TOKEN"))
+logfire.instrument_fastapi(app, capture_headers=True, record_send_receive=True)
 
 
 @app.post(
